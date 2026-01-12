@@ -1,11 +1,9 @@
 from time import perf_counter
 
-a = perf_counter()
-
 from stt.whisper import transcribe
 from llm.orchestrator import run_agents
 
-audio_path = "./audio/Recording.m4a"
+audio_path = "./audio/Recording (2).m4a"
 text = transcribe(audio_path)
 
 print("\n🧠 YOU SAID:", text)

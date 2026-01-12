@@ -9,7 +9,8 @@ class Agent:
         prompt = f"""
 SYSTEM:
 {self.prompt}
-your response should be in less than 50 words. Embrace the personality and give response without any explanation.
+Your response should be strictly between 30 to 50 words.
+Embrace the personality and give only one response without any explanation or alternative and do not repeat yourself.
 
 USER:
 {user_text}
@@ -19,8 +20,8 @@ ASSISTANT:
         output = self.llm(
             prompt,
             temperature = self.temperature,
-            max_tokens = 100,
-            stop = ["USER:"]
+            max_tokens = 60,
+            stop = ["USER:", "SYSTEM:"]
         )
         return {
             "agent" : self.name,
