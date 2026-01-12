@@ -2,8 +2,8 @@ from faster_whisper import WhisperModel
 from time import time
 
 model = WhisperModel(
-    "tiny",
-    device = "cpu",
+    "small",
+    device = "cuda",
     compute_type = "int8"
 )
 

@@ -7,3 +7,6 @@ __pycache__
 
 # any text file, requirements.txt will be added separately
 *.txt
+
+# files used to quick test the code in command line
+test*

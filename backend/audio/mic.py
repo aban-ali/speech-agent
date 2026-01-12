@@ -1,3 +1,10 @@
+"""
+This file is not put in action since I was working in Docker 
+and I did not give my mic control to the container. 
+
+The structure for recording the audio will be similar to this....
+"""
+
 import sounddevice as sd
 import numpy as np
 
