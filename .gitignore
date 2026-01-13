@@ -4,9 +4,13 @@ __pycache__
 # any audio file
 *.mp3
 *.m4a
+*.wav
 
 # any text file, requirements.txt will be added separately
 *.txt
+
+# any file I made for my ease to run a program or docker-image
+*.sh
 
 # files used to quick test the code in command line
 test*

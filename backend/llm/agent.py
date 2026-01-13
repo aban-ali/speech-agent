@@ -5,12 +5,17 @@ class Agent:
         self.temperature = temperature
         self.llm = llm
 
+    def clean_text(self, text):
+        return text.split("*")[0]
+
     def generate(self, user_text):
         prompt = f"""
 SYSTEM:
 {self.prompt}
 Your response should be strictly between 30 to 50 words.
-Embrace the personality and give only one response without any explanation or alternative and do not repeat yourself.
+Write response that should sound like real human speaking out loud.
+Use emotion through word choice, rhythm, and punctuation, like using words such as - aaah, arrrggh, helloooo!!!, damn!!, hmmm.
+Embrace the personality and give only one meaningful response without any explanation or alternative.
 
 USER:
 {user_text}
@@ -25,5 +30,5 @@ ASSISTANT:
         )
         return {
             "agent" : self.name,
-            "text" : output["choices"][0]["text"].strip()
+            "text" : self.clean_text( output["choices"][0]["text"].strip() )
         }
