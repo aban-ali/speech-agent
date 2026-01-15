@@ -14,3 +14,6 @@ __pycache__
 
 # files used to quick test the code in command line
 test*
+
+# for my API keys😜
+*.env

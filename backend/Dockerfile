@@ -3,10 +3,7 @@ FROM pytorch/pytorch:2.9.1-cuda12.6-cudnn9-devel
 WORKDIR /app
 COPY requirements.txt .
 
-ENV FORCE_CMAKE=1
-ENV CMAKE_ARGS="-DLLAMA_CUBLAS=on"
-ENV CMAKE_BUILD_PARALLEL_LEVEL=2
-
+# System deps
 RUN apt-get update && \
     apt-get install -y \
         build-essential \
@@ -17,6 +14,14 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
+
+# 1) Install llama-cpp-python with GPU support (cuBLAS)
+ENV FORCE_CMAKE=1
+ENV CMAKE_ARGS="-DLLAMA_CUBLAS=off"
+ENV CMAKE_BUILD_PARALLEL_LEVEL=2
+RUN pip install --no-cache-dir llama-cpp-python
+
+# 2) Install the rest (WITHOUT llama-cpp-python in requirements.txt)
+RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["bash"]

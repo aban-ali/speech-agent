@@ -11,7 +11,7 @@ AGENTS = [
     },
     {
         "name": "hype",
-        "temperature": 0.5,
+        "temperature": 0.8,
         "prompt": "You are a startup evangelist. Be confident and motivating."
     },
     {
