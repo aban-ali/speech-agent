@@ -1,8 +1,8 @@
 from llm.agent import Agent, GroqAgent
 from llm.model import llm
 from llm.prompts import AGENTS
-from concurrent.futures import ThreadPoolExecutor
 
+# Initial function for generating response
 def run_agents(user_text):
     agents = [
         Agent(agent["name"], agent["prompt"], agent["temperature"], llm) 
@@ -10,14 +10,18 @@ def run_agents(user_text):
     ]
     return [agent.generate(user_text) for agent in agents]
 
-def run_groq_agents(user_text):
-    agents = [
-        GroqAgent(agent["name"], agent["prompt"], agent["temperature"])
-        for agent in AGENTS
-    ]
-    with ThreadPoolExecutor(max_workers=len(agents)) as executor:
-        futures = [
-            executor.submit(agent.groq_generate, user_text)
-            for agent in agents
+# modified version to support multi-threading....
+def run_agent_stream(user_text, mode="local"):
+    if mode == "local":
+        agents = [
+            Agent(agent["name"], agent["prompt"], agent["temperature"], llm) 
+            for agent in AGENTS
         ]
-    return [f.result() for f in futures]
+    else:
+        agents = [
+            GroqAgent(agent["name"], agent["prompt"], agent["temperature"])
+            for agent in AGENTS
+        ]
+
+    for agent in agents:
+        yield agent.generate(user_text)

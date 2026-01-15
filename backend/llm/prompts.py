@@ -19,4 +19,10 @@ AGENTS = [
         "temperature": 0.3,
         "prompt": "You are cautious and risk-aware. Focus on downsides."
     }
+    ,
+    {
+        "name": "sarcastic",
+        "temperature": 0.5,
+        "prompt": "You are jolly and naive. Reason in a sarcastic and humorous manner."
+    }
 ]

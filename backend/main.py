@@ -1,51 +1,58 @@
-from time import perf_counter
+from os.path import basename
 import random
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 from stt.whisper import transcribe
 from stt.groq_whisper import groq_transcribe
 
-from llm.orchestrator import run_agents, run_groq_agents
+from llm.orchestrator import run_agent_stream
 from tts.engine import TTSEngine, GroqEngine
 
 from audio.mixer import mix_wavs
+from audio.timeline_mixer import TimelineMixer
 
 tts = TTSEngine()
 groq_tts = GroqEngine()
 
+base_offsets = {
+    "chaos": 0,
+    "analyst": 120,
+    "hype": 200,
+    "realist": 160,
+}
+
 def local_workflow():
     print("📍 Local Inferencing Starting....")
 
-    audio_path = "./sounds/Recording (2).m4a"
+    audio_path = "./sounds/Recording.m4a"
     text = transcribe(audio_path)
-    responses = run_agents(text)
-
     speaker_map = {
         "chaos": "p239",
         "analyst": "p230",
         "hype": "p363",
         "realist": "p243",
     }
-    print("\n--- AGENTS ---")
-    for r in responses:
-        outpath = f"./ai-audio/{r['agent'].upper()}.wav"
-        print(f"\n[{r['agent'].upper()}]")
-        print(r["text"].strip())
-        tts.speak(r["text"], outpath, speaker_map.get(r["agent"]))
+    tasks = []
+    mixer = TimelineMixer()
 
-    wav_paths = [
-        "./ai-audio/CHAOS.wav",
-        "./ai-audio/ANALYST.wav",
-        "./ai-audio/HYPE.wav",
-        "./ai-audio/REALIST.wav",
-    ]
-    delays_ms = [0, random.randint(80,160), random.randint(180,320), random.randint(120,260)]
-    mix_wavs(
-        wav_paths=wav_paths,
-        delays_ms=delays_ms,
-        out_path="./ai-audio/final_mix.wav",
-        sr=22050
-    )
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        for r in run_agent_stream(text):
+            print(f"\n[{r['agent'].upper()}] {r['text'].strip()}")
+            tasks.append(
+                ex.submit(
+                    tts.speak, r["text"], r["agent"], speaker_map.get(r["agent"])
+                )
+            )
+
+        for task in as_completed(tasks):
+            wav, agent = task.result()
+            offset = random.randint(0, 120)
+            start_ms = base_offsets.get(agent, 0) + offset
+            mixer.add_wav(wav, start_ms=start_ms, gain=0.75)
+            mixer.write("./ai-audio/final_mix.wav")
+
     print("✅ Local Inferencing completed")
 
 
@@ -55,37 +62,35 @@ def groq_workflow():
 
     audio_path = "./sounds/Recording.m4a"
     text = groq_transcribe(audio_path)
-    responses = run_groq_agents(text)
 
     speaker_map = {
         "chaos": "troy",
         "analyst": "autumn",
         "hype": "austin",
         "realist": "hannah",
+        "sarcastic": "austin"
     }
+    tasks = []
+    mixer = TimelineMixer(24000)
 
-    print("\n--- AGENTS ---")
-    for r in responses:
-        outpath = f"./ai-audio/{r['agent'].upper()}.wav"
-        print(f"\n[{r['agent'].upper()}]")
-        print(r["text"].strip())
-        groq_tts.speak(r["text"], outpath, speaker_map.get(r["agent"]))
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        for r in run_agent_stream(text):
+            outpath = f"./ai-audio/{r['agent'].upper()}.wav"
+            print(f"[{r['agent'].upper()}] {r['text'].strip()}")
+            tasks.append(
+                ex.submit(
+                    groq_tts.speak, r["text"], outpath, speaker_map.get(r["agent"])
+                )
+            )
+        for task in as_completed(tasks):
+            path = task.result()
+            agent = basename(path).split(".")[0]
+            offset = random.randint(0, 120)
+            start_ms = base_offsets.get(agent, 0) + offset
+            mixer.add_wav(path, start_ms, gain=0.75)
+            mixer.write("./ai-audio/final_groq_mix.wav")
 
-    wav_paths = [
-        "./ai-audio/CHAOS.wav",
-        "./ai-audio/ANALYST.wav",
-        "./ai-audio/HYPE.wav",
-        "./ai-audio/REALIST.wav",
-    ]
-    delays_ms = [0, random.randint(80,160), random.randint(180,320), random.randint(120,260)]
-    mix_wavs(
-        wav_paths=wav_paths,
-        delays_ms=delays_ms,
-        out_path="./ai-audio/final_groq_mix.wav",
-        sr=24000
-    )
     print("✅ Inferencing with Groq API completed")
-
 
 def parse_args():
     parser = argparse.ArgumentParser("Speech Agent CLI")

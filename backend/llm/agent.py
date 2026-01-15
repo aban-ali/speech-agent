@@ -19,7 +19,7 @@ class GroqAgent:
                 {
                     "role": "system",
                     "content": f"'{self.prompt}'\
-                        Embrace the personality and give response strictly in 1 to 2 sentences.\
+                        Embrace the personality and give response strictly between 30 to 50 words.\
                         Write response that should sound like real human speaking out loud and direct.\
                         Use emotion through word choice, rhythm, and punctuation."
                 },
@@ -56,8 +56,7 @@ SYSTEM:
 Embrace the personality and give only one meaningful response without any explanation or alternative.
 Your response should be strictly between 30 to 50 words.
 Write response that should sound like real human speaking out loud.
-Use emotion through word choice, rhythm, and punctuation, like using words such as - aaah, arrrggh, helloooo!!!, damn!!, hmmm.
-
+Use emotion through word choice, rhythm, and punctuation.
 
 USER:
 {user_text}
