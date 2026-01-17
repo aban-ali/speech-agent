@@ -13,7 +13,7 @@ class GroqAgent:
         self.temperature = temperature
         self.model = model
 
-    def groq_generate(self, user_text):
+    def generate(self, user_text):
         response = self.client.chat.completions.create(
             messages = [
                 {

@@ -5,6 +5,7 @@ import uvicorn
 import argparse
 import shutil
 import subprocess
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from fastapi import FastAPI, UploadFile, File
 # from fastapi.responses import FileResponse
@@ -20,6 +21,7 @@ from tts.engine import TTSEngine, GroqEngine
 # from audio.mixer import mix_wavs
 from audio.timeline_mixer import TimelineMixer
 
+warnings.filterwarnings("ignore")
 tts = TTSEngine()
 groq_tts = GroqEngine()
 app = FastAPI()
@@ -122,7 +124,7 @@ def groq_workflow(audio_path):
 
 
 @app.post("/run")
-async def upload_audio(file: UploadFile = File(...), mode: str = "grok"):
+async def upload_audio(file: UploadFile = File(...), mode: str = "local"):
     time = strftime("%d-%a %H:%M:%S")
     file_location = f"./sounds/{time}_{file.filename}"
     with open(file_location, "wb+") as file_object:
