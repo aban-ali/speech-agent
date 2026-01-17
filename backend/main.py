@@ -1,7 +1,14 @@
 from os.path import basename
+from time import strftime
 import random
+import uvicorn
 import argparse
+import shutil
+import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from fastapi import FastAPI, UploadFile, File
+# from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 
 from stt.whisper import transcribe
@@ -10,36 +17,48 @@ from stt.groq_whisper import groq_transcribe
 from llm.orchestrator import run_agent_stream
 from tts.engine import TTSEngine, GroqEngine
 
-from audio.mixer import mix_wavs
+# from audio.mixer import mix_wavs
 from audio.timeline_mixer import TimelineMixer
 
 tts = TTSEngine()
 groq_tts = GroqEngine()
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 base_offsets = {
     "chaos": 0,
     "analyst": 120,
     "hype": 200,
     "realist": 160,
+    "sarcastic": 180
 }
 
-def local_workflow():
+def local_workflow(audio_path):
     print("📍 Local Inferencing Starting....")
 
-    audio_path = "./sounds/Recording.m4a"
     text = transcribe(audio_path)
     speaker_map = {
         "chaos": "p239",
         "analyst": "p230",
         "hype": "p363",
         "realist": "p243",
+        "sarcastic": "p351"
     }
     tasks = []
     mixer = TimelineMixer()
-
+    agent_data = []
     with ThreadPoolExecutor(max_workers=5) as ex:
         for r in run_agent_stream(text):
             print(f"\n[{r['agent'].upper()}] {r['text'].strip()}")
+            agent_data.append({"agent": r["agent"].upper(), "text": r["text"]})
             tasks.append(
                 ex.submit(
                     tts.speak, r["text"], r["agent"], speaker_map.get(r["agent"])
@@ -54,13 +73,16 @@ def local_workflow():
             mixer.write("./ai-audio/final_mix.wav")
 
     print("✅ Local Inferencing completed")
+    return {
+        "transcript": text,
+        "agents": agent_data,
+        "output_audio": "./ai-audio/final_mix.wav"
+    }
 
 
-
-def groq_workflow():
+def groq_workflow(audio_path):
     print("📍 Inferencing using Groq API is Starting....")
 
-    audio_path = "./sounds/Recording.m4a"
     text = groq_transcribe(audio_path)
 
     speaker_map = {
@@ -72,11 +94,12 @@ def groq_workflow():
     }
     tasks = []
     mixer = TimelineMixer(24000)
-
+    agent_data = []
     with ThreadPoolExecutor(max_workers=5) as ex:
-        for r in run_agent_stream(text):
+        for r in run_agent_stream(text, "grok"):
             outpath = f"./ai-audio/{r['agent'].upper()}.wav"
             print(f"[{r['agent'].upper()}] {r['text'].strip()}")
+            agent_data.append({"agent": r["agent"].upper(), "text": r["text"]})
             tasks.append(
                 ex.submit(
                     groq_tts.speak, r["text"], outpath, speaker_map.get(r["agent"])
@@ -84,13 +107,34 @@ def groq_workflow():
             )
         for task in as_completed(tasks):
             path = task.result()
-            agent = basename(path).split(".")[0]
+            agent = basename(path).split(".")[0].lower()
             offset = random.randint(0, 120)
             start_ms = base_offsets.get(agent, 0) + offset
             mixer.add_wav(path, start_ms, gain=0.75)
             mixer.write("./ai-audio/final_groq_mix.wav")
 
     print("✅ Inferencing with Groq API completed")
+    return {
+        "transcript": text,
+        "agents": agent_data,
+        "output_audio": "./ai-audio/final_groq_mix.wav"
+    }
+
+
+@app.post("/run")
+async def upload_audio(file: UploadFile = File(...), mode: str = "grok"):
+    time = strftime("%d-%a %H:%M:%S")
+    file_location = f"./sounds/{time}_{file.filename}"
+    with open(file_location, "wb+") as file_object:
+        shutil.copyfileobj(file.file, file_object)
+    outpath = f"./sounds/{time}_processed.wav"
+    subprocess.run(["ffmpeg", "-y", "-i", file_location, "-ar", "24000", outpath])
+    res = groq_workflow(outpath) if mode=="grok" else local_workflow(outpath)
+    return res
+
+@app.get("/health/")
+async def health_check():
+    return {"status": "ok"}
 
 def parse_args():
     parser = argparse.ArgumentParser("Speech Agent CLI")
@@ -110,22 +154,15 @@ def parse_args():
             LLM: openai/gpt-oss-20b\
             TTS model: canopylabs/orpheus-v1-english"
     )
-    parser.add_argument(
-        "--server",
-        action="store_true",
-        help="Run the API server."
-    )
 
     args = parser.parse_args()
-    return [args.local, args.groq, args.server]
+    return [args.local, args.groq]
 
 if __name__=="__main__":
-    local, groq, server = parse_args()
+    local, groq = parse_args()
     if(local):
         local_workflow()
     elif(groq):
         groq_workflow()
-    elif(server):
-        pass
     else:
-        print("Invalid operation. Please continue with '-h' flag to get all option details.")
+        uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)

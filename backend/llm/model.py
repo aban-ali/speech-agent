@@ -5,5 +5,6 @@ llm = Llama(
     n_ctx = 512,
     n_gpu_layers = -1,
     n_threads = 8,
-    n_batch = 256
+    n_batch = 256,
+    verbose = False
 )
