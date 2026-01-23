@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from fastapi import FastAPI, UploadFile, File
 # from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 
 from stt.whisper import transcribe
@@ -33,6 +34,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/files", StaticFiles(directory="./ai-audio"), name="files")
 
 
 base_offsets = {
@@ -78,7 +81,7 @@ def local_workflow(audio_path):
     return {
         "transcript": text,
         "agents": agent_data,
-        "output_audio": "./ai-audio/final_mix.wav"
+        "output_audio": "/files/final_mix.wav"
     }
 
 
@@ -113,7 +116,7 @@ def groq_workflow(audio_path):
             offset = random.randint(0, 120)
             start_ms = base_offsets.get(agent, 0) + offset
             mixer.add_wav(path, start_ms, gain=0.75)
-            mixer.write("./ai-audio/final_groq_mix.wav")
+            mixer.write("/files/final_groq_mix.wav")
 
     print("✅ Inferencing with Groq API completed")
     return {

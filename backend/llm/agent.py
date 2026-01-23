@@ -1,12 +1,11 @@
 from groq import Groq
-from dotenv import DotEnv
+from os import getenv
 
-env = DotEnv()
 
 class GroqAgent:
     def __init__(self, name, prompt, temperature, model="openai/gpt-oss-20b"):
         self.client = Groq(
-            api_key=env.get("GROQ_API_KEY")
+            api_key=getenv("GROQ_API_KEY")
         )
         self.name = name
         self.prompt = prompt

@@ -1,11 +1,8 @@
 from TTS.api import TTS
 from groq import Groq
-from dotenv import DotEnv
 import numpy as np
 import soundfile as sf
-import os
-
-env = DotEnv()
+from os import getenv
 
 class TTSEngine:
     def __init__(self, model_name="tts_models/en/vctk/vits"):
@@ -23,7 +20,7 @@ class TTSEngine:
 class GroqEngine:
     def __init__(self):
         self.client = Groq(
-            api_key = env.get("GROQ_API_KEY")
+            api_key = getenv("GROQ_API_KEY")
         )
     
     def speak(self, text, outpath, speaker, model="canopylabs/orpheus-v1-english"):

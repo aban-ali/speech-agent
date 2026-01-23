@@ -1,10 +1,8 @@
 from groq import Groq
-from dotenv import DotEnv
-
-env = DotEnv()
+from os import getenv
 
 client = Groq(
-      api_key = env.get("GROQ_API_KEY")
+      api_key = getenv("GROQ_API_KEY")
 )
 
 def groq_transcribe(filename, model="whisper-large-v3-turbo"):
