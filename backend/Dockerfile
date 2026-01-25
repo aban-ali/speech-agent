@@ -24,4 +24,10 @@ RUN pip install --no-cache-dir llama-cpp-python
 # 2) Install the rest (WITHOUT llama-cpp-python in requirements.txt)
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY audio /app/audio
+COPY llm /app/llm
+COPY stt /app/stt
+COPY tts /app/tts
+COPY main.py /app/
+
 CMD ["bash"]

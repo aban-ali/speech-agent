@@ -1,7 +1,6 @@
 from os.path import basename
 from time import strftime
 import random
-import uvicorn
 import argparse
 import shutil
 import subprocess
@@ -163,11 +162,11 @@ def parse_args():
     args = parser.parse_args()
     return [args.local, args.groq]
 
-if __name__=="__main__":
-    local, groq = parse_args()
-    if(local):
-        local_workflow()
-    elif(groq):
-        groq_workflow()
-    else:
-        uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
+# if __name__=="__main__":
+#     local, groq = parse_args()
+#     if(local):
+#         local_workflow()
+#     elif(groq):
+#         groq_workflow()
+#     else:
+#         uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
