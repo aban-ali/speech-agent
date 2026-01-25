@@ -1,0 +1,50 @@
+services:
+  backend:
+    image: speechagent-backend
+    container_name: speech-agent-backend
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    env_file:
+      - ./backend/.env
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+      - tts_cache:/root/.local/share/tts
+      - processed_audio:/app/sounds
+      - audio_results:/app/ai-audio
+    networks:
+      - speech-network
+    restart: unless-stopped
+    command: -m uvicorn main:app --host 0.0.0.0 --port 8000
+
+  frontend:
+    image: speechagent-frontend:latest
+    container_name: speech-agent-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://backend:8000
+    volumes:
+      - ./frontend:/app
+      # - /app/node_modules
+    networks:
+      - speech-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  speech-network:
+    driver: bridge
+
+volumes:
+  hf_cache:
+  tts_cache:
+  # backend-data:
+  # frontend-node-modules:
