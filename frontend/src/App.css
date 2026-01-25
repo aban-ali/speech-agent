@@ -40,3 +40,34 @@
 .read-the-docs {
   color: #888;
 }
+
+.modeToggle {
+  display: inline-flex;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  margin-bottom: 20px;
+}
+
+.modeBtn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  background: white;
+  color: #0b2d33;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.modeBtn:hover {
+  transform: translateY(-1px);
+}
+
+.modeBtn.active {
+  background: #0b2d33;
+  color: rgb(106, 133, 232);
+  border-color: rgba(0, 0, 0, 0.25);
+}
