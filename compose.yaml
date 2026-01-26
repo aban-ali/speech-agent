@@ -45,7 +45,6 @@ networks:
 
 volumes:
   hf_cache:
-    external: true
   tts_cache:
   processed_audio:
   audio_results:
