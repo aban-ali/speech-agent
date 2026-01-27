@@ -1,0 +1,9 @@
+faster-whisper
+TTS
+scipy
+llama-cpp-python
+groq
+uvicorn
+fastapi
+dotenv-python
+python-multipart
