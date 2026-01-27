@@ -1,7 +1,8 @@
 FROM pytorch/pytorch:2.9.1-cuda12.6-cudnn9-devel
 
 WORKDIR /app
-COPY requirements.txt .
+
+ENV PYTHONUNBUFFERED=1
 
 # System deps
 RUN apt-get update && \
@@ -15,13 +16,13 @@ RUN apt-get update && \
 
 RUN pip install --upgrade pip setuptools wheel
 
-# 1) Install llama-cpp-python with GPU support (cuBLAS)
+# 1) Install llama-cpp-python
 ENV FORCE_CMAKE=1
 ENV CMAKE_ARGS="-DLLAMA_CUBLAS=off"
 ENV CMAKE_BUILD_PARALLEL_LEVEL=2
 RUN pip install --no-cache-dir llama-cpp-python
 
-# 2) Install the rest (WITHOUT llama-cpp-python in requirements.txt)
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY audio /app/audio
@@ -29,5 +30,6 @@ COPY llm /app/llm
 COPY stt /app/stt
 COPY tts /app/tts
 COPY main.py /app/
+COPY .env /app/
 
-CMD ["bash"]
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

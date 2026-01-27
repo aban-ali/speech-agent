@@ -1,6 +1,6 @@
 services:
   backend:
-    image: speechagent-backend
+    build: ./backend
     container_name: speech-agent-backend
     ports:
       - "8000:8000"
@@ -24,15 +24,14 @@ services:
     command: python -m uvicorn main:app --host 0.0.0.0 --port 8000
 
   frontend:
-    image: speechagent-frontend:latest
+    build: ./frontend
     container_name: speech-agent-frontend
     ports:
       - "5173:5173"
     environment:
       - VITE_API_URL=http://backend:8000
-    volumes:
-      - ./frontend:/app
-      # - /app/node_modules
+    # volumes:
+    #   - ./frontend:/app
     networks:
       - speech-network
     depends_on:
