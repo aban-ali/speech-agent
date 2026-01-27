@@ -30,6 +30,5 @@ COPY llm /app/llm
 COPY stt /app/stt
 COPY tts /app/tts
 COPY main.py /app/
-COPY .env /app/
 
 CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
