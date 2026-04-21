@@ -29,7 +29,7 @@ Built to explore **speech-first AI UX**, **multi-agent orchestration**, and
   - Live transcript & agent cards
 - 🐳 **Fully Dockerized**
 - 🔁 **Hybrid mode**
-  - Switch between local models and Grok APIs
+  - Switch between local models and Groq APIs
 
 ---
 
@@ -78,7 +78,7 @@ Frontend Audio Playback
 - TTS: Coqui VITS
 - Fully offline (after model download)
 
-### Grok Mode
+### Groq Mode
 - STT: Whisper Large (Groq)
 - LLM: Proprietary (Groq)
 - TTS: Orpheus

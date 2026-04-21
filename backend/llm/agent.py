@@ -3,7 +3,7 @@ from os import getenv
 
 
 class GroqAgent:
-    def __init__(self, name, prompt, temperature, model="openai/gpt-oss-20b"):
+    def __init__(self, name, prompt, temperature, model="qwen/qwen3-32b"):
         self.client = Groq(
             api_key=getenv("GROQ_API_KEY")
         )
@@ -18,7 +18,7 @@ class GroqAgent:
                 {
                     "role": "system",
                     "content": f"'{self.prompt}'\
-                        Embrace the personality and give response strictly between 30 to 50 words.\
+                        Embrace the personality and respond strictly between 30 to 50 words.\
                         Write response that should sound like real human speaking out loud and direct.\
                         Use emotion through word choice, rhythm, and punctuation."
                 },
@@ -29,8 +29,10 @@ class GroqAgent:
             ],
             model = self.model,
             temperature = self.temperature,
-            max_completion_tokens = 128,
-            top_p=0.9
+            max_completion_tokens = 100,
+            reasoning_effort = "none",
+            top_p=0.9,
+            stream=False
         )
         return {
             "agent": self.name,
@@ -65,7 +67,7 @@ ASSISTANT:
         output = self.llm(
             prompt,
             temperature = self.temperature,
-            max_tokens = 60,
+            max_tokens = 128,
             stop = ["USER:", "SYSTEM:"]
         )
         return {

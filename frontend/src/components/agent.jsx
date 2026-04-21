@@ -35,11 +35,11 @@ function ModeToggle({ mode, setMode }) {
         </button>
 
         <button
-            className={`modeBtn ${mode === "grok" ? "active" : ""}`}
-            onClick={() => setMode("grok")}
+            className={`modeBtn ${mode === "groq" ? "active" : ""}`}
+            onClick={() => setMode("groq")}
             type="button"
         >
-            Grok (Proprietary)
+            Groq (Proprietary)
         </button>
     </div>
     </>
@@ -52,7 +52,7 @@ export function Agent() {
   const [supported, setSupported] = useState(true);
   const [recording, setRecording] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState("grok");
+  const [mode, setMode] = useState("groq");
 
 
   const [transcript, setTranscript] = useState("");
@@ -124,8 +124,8 @@ export function Agent() {
     try {
       const form = new FormData();
       form.append("file", blob, "recording.webm");
+      console.log("Sending audio to backend with mode:", mode);
       form.append("mode", mode);
-
       const res = await fetch(`${BACKEND_URL}/run`, {
         method: "POST",
         body: form,

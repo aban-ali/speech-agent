@@ -1,6 +1,7 @@
 services:
   backend:
-    build: ./backend
+    # build: ./backend
+    image: speech_agent-backend
     container_name: speech-agent-backend
     # open port for easy debugging
     ports:
@@ -17,8 +18,9 @@ services:
     volumes:
       - hf_cache:/root/.cache/huggingface
       - tts_cache:/root/.local/share/tts
-      - processed_audio:/app/sounds
-      - audio_results:/app/ai-audio
+      # - processed_audio:/app/sounds
+      - ./backend/sound/:/app/sounds
+      - audio_results:/app/ai-audio/
     networks:
       - speech-network
     restart: unless-stopped

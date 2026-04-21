@@ -3,6 +3,7 @@ FROM pytorch/pytorch:2.9.1-cuda12.6-cudnn9-devel
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
 # System deps
 RUN apt-get update && \
@@ -20,10 +21,10 @@ RUN pip install --upgrade pip setuptools wheel
 ENV FORCE_CMAKE=1
 ENV CMAKE_ARGS="-DLLAMA_CUBLAS=off"
 ENV CMAKE_BUILD_PARALLEL_LEVEL=2
-RUN pip install --no-cache-dir llama-cpp-python
+RUN pip install llama-cpp-python
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 COPY audio /app/audio
 COPY llm /app/llm
@@ -31,4 +32,4 @@ COPY stt /app/stt
 COPY tts /app/tts
 COPY main.py /app/
 
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
