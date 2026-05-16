@@ -103,10 +103,10 @@ This project explores:
 
 ## 📌 Future Work
 
-True streaming TTS (chunk-level)
-Emotion control per agent
-Mobile-friendly UI
-Agent-to-agent debates
+- True streaming TTS (chunk-level)
+- Emotion control per agent
+- Mobile-friendly UI
+- Agent-to-agent debates
 
 ---
 
